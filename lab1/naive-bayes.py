@@ -1,10 +1,15 @@
+from numpy import vectorize
 import pandas as pd
 import re
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import plot_confusion_matrix, plot_roc_curve
+import matplotlib.pyplot as plt
 
 # read all data
-trainData = pd.read_csv("lab1/train.csv", header=None, names=["sentiment", "data"])
-evaluationData = pd.read_csv("lab1/evaluation.csv", header=None, names=["sentiment", "data"])
-testData = pd.read_csv("lab1/test.csv", header=None, names=["sentiment", "data"])
+trainData = pd.read_csv("train.csv", header=None, names=["sentiment", "data"])
+testData = pd.read_csv("test.csv", header=None, names=["sentiment", "data"])
+evaluationData = pd.read_csv("evaluation.csv", header=None, names=["sentiment", "data"])
 
 """
 We need to clean the data from:
@@ -13,8 +18,8 @@ HTML tags, hashtags, mentions (@), emojis
 """
 # remove headers
 trainData = trainData[1:]
-evaluationData = evaluationData[1:]
 testData = testData[1:]
+evaluationData = evaluationData[1:]
 
 def preProcessing(data):
     processedData = []
@@ -27,6 +32,27 @@ def preProcessing(data):
         processedData.append(line)
     return processedData
 
-# print(evaluationData[0:5])
-print(preProcessing(testData.data)[127])
-# print(testData)
+#clean
+trainData.data = preProcessing(trainData.data)
+testData.data = preProcessing(testData.data)
+evaluationData.data = preProcessing(evaluationData.data)
+
+
+# feature extraction
+vectorizer = CountVectorizer(stop_words="english")
+trainText = vectorizer.fit_transform(trainData.data)
+testText = vectorizer.transform(testData.data)
+evalText = vectorizer.transform(preProcessing(evaluationData.data))
+
+# Classify
+classifier = MultinomialNB()
+classifier.fit(trainText, trainData.sentiment)
+
+# performance measure
+print(classifier.score(testText, testData.sentiment)) # test score
+print(classifier.score(evalText, evaluationData.sentiment)) # evaluation score
+matrix = plot_confusion_matrix(classifier, evalText, evaluationData.sentiment, normalize="true") 
+plot_roc_curve(classifier, testText, testData.sentiment)
+plt.show()
+
+
