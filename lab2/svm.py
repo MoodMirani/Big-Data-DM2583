@@ -1,15 +1,16 @@
-from numpy import vectorize
 import pandas as pd
 import re
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import plot_confusion_matrix, plot_roc_curve
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import RocCurveDisplay
 import matplotlib.pyplot as plt
+from sklearn import svm
+
 
 # read all data
-trainData = pd.read_csv("train.csv", header=None, names=["sentiment", "data"])
-testData = pd.read_csv("test.csv", header=None, names=["sentiment", "data"])
-evaluationData = pd.read_csv("evaluation.csv", header=None, names=["sentiment", "data"])
+trainData = pd.read_csv("lab1/train.csv", header=None, names=["sentiment", "data"])
+testData = pd.read_csv("lab1/test.csv", header=None, names=["sentiment", "data"])
+evaluationData = pd.read_csv("lab1/evaluation.csv", header=None, names=["sentiment", "data"])
 
 """
 We need to clean the data from:
@@ -45,12 +46,12 @@ testText = vectorizer.transform(testData.data)
 evalText = vectorizer.transform(preProcessing(evaluationData.data))
 
 # Classify
-classifier = MultinomialNB()
+classifier = svm.SVC() # the kernel: Gaussian Radial basis function
 classifier.fit(trainText, trainData.sentiment)
 
 # performance measure
 print(classifier.score(testText, testData.sentiment)) # test score
 print(classifier.score(evalText, evaluationData.sentiment)) # evaluation score
-matrix = plot_confusion_matrix(classifier, evalText, evaluationData.sentiment, normalize="true") 
-plot_roc_curve(classifier, testText, testData.sentiment)
+ConfusionMatrixDisplay.from_estimator(classifier, evalText, evaluationData.sentiment, normalize="true") 
+RocCurveDisplay.from_estimator(classifier, evalText, evaluationData.sentiment)
 plt.show()
