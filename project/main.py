@@ -8,11 +8,14 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 def main():
     Training_Set = Create_Training_Set()
-    SVM_Classifier = Train_SVM_Classifier(Training_Set)
+    SVM_Classifier = Train_SVM_Classifier(Training_Set) 
     Wine_Data_Set = Gather_Wine_Tweets("Load_From_Local")
+   
     y = Classify_Data(Wine_Data_Set, SVM_Classifier)
-    print("printing the shape of y: ")
+    print(type(y))
     print(y.shape)
+    print(y[0:5])  
+   
 
 
 def Classify_Data(Wine_Data_Set, SVM_Classifier):
@@ -20,7 +23,8 @@ def Classify_Data(Wine_Data_Set, SVM_Classifier):
     # vectorizing
     vectorizer = CountVectorizer(stop_words="english")
     all_features = vectorizer.fit_transform(Wine_Data_Set.tweet)
-    y = SVM_Classifier.predict([all_features[0]])
+
+    y = SVM_Classifier.predict([all_features])
     return y
 
 def Save_To_File(filename, data):
