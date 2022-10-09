@@ -10,12 +10,13 @@ def main():
     Training_Set = Create_Training_Set()
     SVM_Classifier = Train_SVM_Classifier(Training_Set) 
     Wine_Data_Set = Gather_Wine_Tweets("Load_From_Local")
-   
+
+    """
     y = Classify_Data(Wine_Data_Set, SVM_Classifier)
     print(type(y))
     print(y.shape)
     print(y[0:5])  
-   
+   """
 
 
 def Classify_Data(Wine_Data_Set, SVM_Classifier):

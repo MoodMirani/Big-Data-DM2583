@@ -20,17 +20,17 @@ def Train_SVM_Classifier(Training_Set):
     all_features = vectorizer.fit_transform(Training_Set.tweet)
 
     # splitting
-    X_train, X_test, y_train, y_test = train_test_split(all_features, Training_Set.sentiment, test_size=0.30, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(all_features, Training_Set.sentiment, test_size=0.30, random_state=80)
 
     # create classifier
     classifier = svm.SVC() # the kernel: Gaussian Radial basis function
     classifier.fit(X_train, y_train)
 
-    """ 
+    
     # performance measure
     print("SVM Classifier score: " + str(classifier.score(X_test, y_test)))
     ConfusionMatrixDisplay.from_estimator(classifier, X_test, y_test, normalize="true") 
     RocCurveDisplay.from_estimator(classifier, X_test, y_test)
     plt.show()
-    """
+    
     return classifier
