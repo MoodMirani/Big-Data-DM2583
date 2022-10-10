@@ -2,61 +2,57 @@ from pathlib import Path
 from SVM import Train_SVM_Classifier
 import pandas as pd
 from TwitterAPI import Get_Tweets_From_API
-from Cleanup import cleanup
 from sklearn.feature_extraction.text import CountVectorizer
+from functions import *
+from MultinomialNB import train_multinomial_naive_bayes
+from collections import Counter
+from nltk.corpus import stopwords
+import nltk
+from nltk.tokenize import word_tokenize
+
 
 
 def main():
-    Training_Set = Create_Training_Set()
-    SVM_Classifier = Train_SVM_Classifier(Training_Set) 
-    Wine_Data_Set = Gather_Wine_Tweets("Load_From_Local")
+    training_set = create_training_set("load_local_cleaned_Data")
+    wine_data_set = gather_wine_tweets("load_from_local")
+    print(wine_data_set.tail)
 
-    """
-    y = Classify_Data(Wine_Data_Set, SVM_Classifier)
-    print(type(y))
-    print(y.shape)
-    print(y[0:5])  
-   """
+    model = train_multinomial_naive_bayes(training_set)
+
+    sentiment = model.predict(wine_data_set.tweet)
+
+    predicted_wine_tweets = pd.DataFrame({
+        "sentiment": sentiment,
+        "tweet": wine_data_set.tweet
+    })
+
+    save_to_file("predicted_wine_tweets.csv", predicted_wine_tweets)
+
+    # find all tweets with positive sentiment
+    positive_predicted_wine_tweets = predicted_wine_tweets[predicted_wine_tweets["sentiment"]=="4"]
+    save_to_file("positive_predicted_wine_tweets.csv", positive_predicted_wine_tweets)
+
+    text = ""
+    for row in positive_predicted_wine_tweets.tweet:
+        text = text + " " + row
+    
+    words = word_tokenize(text)
+    words_without_stopwords = [word for word in words if not word in stopwords.words()]
+      
+    # split() returns list of all the words in the string
+    #split_it = text.split()
+    
+    # Pass the split_it list to instance of Counter class.
+    counter = Counter(words_without_stopwords)
+    
+    # most_common() produces k frequently encountered
+    # input values and their respective counts.
+    most_occur = counter.most_common(40)
+
+    for word in most_occur:
+        print(word)
 
 
-def Classify_Data(Wine_Data_Set, SVM_Classifier):
-    print("Classifying the Wine Data")
-    # vectorizing
-    vectorizer = CountVectorizer(stop_words="english")
-    all_features = vectorizer.fit_transform(Wine_Data_Set.tweet)
-
-    y = SVM_Classifier.predict([all_features])
-    return y
-
-def Save_To_File(filename, data):
-    filepath = Path('project/data/' + filename)
-    filepath.parent.mkdir(parents=True, exist_ok=True)  
-    data.to_csv(filepath)
-    print("Saved the tweets to the file: " + filename)
-
-def Create_Training_Set():
-    # Gather data
-    Training_Set = pd.read_csv("project/data/training.csv", names=["sentiment", "ID", "date", "query", "user", "tweet"])
-    Training_Set = Training_Set.drop([ "ID", "date", "query", "user"], axis=1)
-    Training_Set_Negative = Training_Set[1:7000] # Extract 7000 negative tweets
-    Training_Set_Positive = Training_Set[900000:907000] # Extract 7000 positive tweets
-    Training_Set = pd.concat([Training_Set_Negative, Training_Set_Positive]) # merge them into one file
-    return Training_Set
-
-def Gather_Wine_Tweets(Choice):
-    if Choice == "Load_From_Local":
-        print("Loading tweets about wine from the local drive")
-        Wine_Data_Set = pd.read_csv('project/data/Cleaned_Wine_Data_Set.csv', names=["tweet"])
-        Wine_Data_Set = Wine_Data_Set[1:] # removing header
-        return Wine_Data_Set
-
-    elif Choice == "Load_From_Twitter_API":
-        print("Gathering tweets about wine from the Twitter API")
-        Wine_Data_Set = Get_Tweets_From_API()
-        print("Cleaning the tweets")
-        Wine_Data_Set.tweet = cleanup(Wine_Data_Set.tweet)
-        Save_To_File("Cleaned_Wine_Data_Set.csv", Wine_Data_Set)
-        return Wine_Data_Set
 
 # start the programme
 main()

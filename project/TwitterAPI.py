@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 from pathlib import Path
-from Cleanup import cleanup
 
 def Get_Tweets_From_API():
     load_dotenv()

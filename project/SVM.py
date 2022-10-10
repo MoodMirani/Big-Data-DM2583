@@ -7,7 +7,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import RocCurveDisplay
 import matplotlib.pyplot as plt
 from pathlib import Path
-from Cleanup import cleanup
+from functions import *
 
 def Train_SVM_Classifier(Training_Set):
     print("Training the SVM Classifier")
