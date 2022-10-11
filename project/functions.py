@@ -2,6 +2,29 @@ from pathlib import Path
 import re
 import pandas as pd
 from TwitterAPI import Get_Tweets_From_API
+from collections import Counter
+from nltk.corpus import stopwords
+import nltk
+from nltk.tokenize import word_tokenize
+
+def most_common_words(dataframe):
+    text = ""
+    for row in dataframe.tweet:
+        text = text + " " + row
+    
+    print("tokenizing the words")
+    words = word_tokenize(text)
+
+    print("removing stopwords")
+    words_without_stopwords = [word for word in words if not word in stopwords.words()]
+
+    print("counting the words")
+    counter = Counter(words_without_stopwords)
+
+    print("printing the words")
+    most_occur = counter.most_common(40)
+    for word in most_occur:
+        print(word)
 
 
 def gather_wine_tweets(choice):
@@ -28,8 +51,8 @@ def create_training_set(choice):
     elif choice == "extract_new_data":
         training_set = pd.read_csv("project/data/training.csv", names=["sentiment", "ID", "date", "query", "user", "tweet"])
         training_set = training_set.drop([ "ID", "date", "query", "user"], axis=1)
-        training_set_negative = training_set[1:7000] # Extract 7000 negative tweets
-        training_set_positive = training_set[900000:907000] # Extract 7000 positive tweets
+        training_set_negative = training_set[1:700000] # Extract 700000 negative tweets
+        training_set_positive = training_set[810000:1510000] # Extract 700000 positive tweets
         training_set = pd.concat([training_set_negative, training_set_positive]) # merge them into one file
         training_set.tweet = cleanup(training_set.tweet)
         save_to_file("cleaned_training_data.csv", training_set)

@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer # finds out the weight of the words, how determining the word is
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import make_pipeline # used to organise the flow from the vectorizer and MNB
-from sklearn.metrics import confusion_matrix, plot_confusion_matrix, plot_roc_curve
+from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay
 from sklearn.model_selection import train_test_split
 from functions import *
 
@@ -17,12 +17,23 @@ def train_multinomial_naive_bayes(training_set):
 
     model = make_pipeline(TfidfVectorizer(), MultinomialNB())
     model.fit(X_train, y_train)
+    
+    """
+    y_test_predictions = model.predict(X_test)
 
-    """
+     
     # performance measure
-    print(model.M.score(y_train, y_test)) # test score
-    matrix = plot_confusion_matrix(model, y_train, y_test, normalize="true") 
-    plot_roc_curve(model, y_train, y_test)
+    print("MNB Classifier score: " + str(model.score(X_test, y_test)))
+    ConfusionMatrixDisplay.from_estimator(model, X_test, y_test, normalize="true") 
+    RocCurveDisplay.from_estimator(model, X_test, y_test)
     plt.show()
+
+    
+    # creating confusion matrix and heat map
+    mat = confusion_matrix(y_test, y_test_predictions)
+    sns.heatmap(mat.T, square=True, annot=True, fmt='d', cbar=False, xticklabels=["positive", "negative"], yticklabels=["positive", "negative"])
+    plt.xlabel("true label")
+    plt.ylabel("predicted label")
     """
+
     return(model)
